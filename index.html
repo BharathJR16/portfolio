@@ -131,6 +131,7 @@ section{padding:110px 0;position:relative}
   position:relative;overflow:hidden;
 }
 .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  pointer-events:none;
   background:linear-gradient(140deg,rgba(34,211,238,.35),transparent 40%,transparent 60%,rgba(168,85,247,.35));
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s}
@@ -242,7 +243,7 @@ header#nav.scrolled{padding:11px 0;background:rgba(6,9,18,.72);backdrop-filter:b
    ============================================================ */
 #stats{padding:20px 0 40px}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.stat{padding:26px 22px;text-align:center}
+.stat{padding:26px 22px;text-align:center;position:relative}
 .stat .num{font-family:var(--font-display);font-size:clamp(30px,4vw,42px);font-weight:700;line-height:1;background:var(--grad-3);-webkit-background-clip:text;background-clip:text;color:transparent}
 .stat .lbl{color:var(--muted);font-size:13.5px;margin-top:10px;font-family:var(--font-mono);letter-spacing:.5px}
 
@@ -943,16 +944,49 @@ function renderHero(){
   startTyping(p.roles && p.roles.length ? p.roles : ["Developer"]);
 }
 
-function renderStats(){
-  const c = data.certificates;
-  const stats = [
+function getDefaultStats(){
+  const c = data.certificates || [];
+  return [
     {num:c.length, lbl:"Total Certificates"},
     {num:c.filter(x=>x.category==="Hackathon").length, lbl:"Hackathons"},
     {num:c.filter(x=>x.category==="Internship").length, lbl:"Internships"},
     {num:c.filter(x=>x.category==="Course").length, lbl:"Courses"}
   ];
-  $("#stats-grid").innerHTML = stats.map(s=>`
-    <div class="glass stat"><div class="num" data-count="${s.num}">0</div><div class="lbl">${esc(s.lbl)}</div></div>`).join("");
+}
+
+function renderStats(){
+  const defaults=getDefaultStats();
+  const stats=Array.isArray(data.stats)&&data.stats.length===4 ? data.stats : defaults;
+  $("#stats-grid").innerHTML=stats.map((s,i)=>`
+    <div class="glass stat">
+      <button type="button" class="edit-btn admin-only stat-edit" data-edit-stat="${i}" title="Edit statistic" style="display:${isAdmin?"inline-flex":"none"};position:absolute;top:10px;right:10px;width:28px;height:28px">${ico("edit")}</button>
+      <div class="num" data-count="${Number(s.num)||0}">0</div>
+      <div class="lbl">${esc(s.lbl||"")}</div>
+    </div>`).join("");
+  $$("[data-edit-stat]").forEach(btn=>{
+    btn.addEventListener("click",ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      editStat(Number(btn.dataset.editStat));
+    });
+  });
+}
+
+function editStat(i){
+  const defaults=getDefaultStats();
+  const stats=Array.isArray(data.stats)&&data.stats.length===4 ? data.stats : defaults;
+  const current=stats[i]||defaults[i];
+  openForm("Edit Statistic",[
+    {name:"num",label:"Number",type:"number",placeholder:"e.g. 5"},
+    {name:"lbl",label:"Label",placeholder:"e.g. Total Certificates"}
+  ],current,o=>{
+    if(!Array.isArray(data.stats)||data.stats.length!==4) data.stats=defaults.map(x=>({...x}));
+    data.stats[i]={num:Math.max(0,parseInt(o.num,10)||0),lbl:o.lbl||defaults[i].lbl};
+    persist();
+    renderStats();
+    animateCounters();
+    toast("Statistic updated.","ok");
+  });
 }
 
 function renderAbout(){
@@ -982,6 +1016,32 @@ function renderSkills(){
         </div>`).join("")}
     </div>`).join("");
   $("#skills-content").innerHTML = html || `<p class="lead">No skills yet.</p>`;
+  syncAdminTools();
+
+  // Bind skill controls directly after every render. This avoids relying only
+  // on document-level event delegation for dynamically-created buttons.
+  $("#skills-content").querySelectorAll("[data-edit-skill]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      editSkill(Number(btn.dataset.editSkill));
+    });
+  });
+  $("#skills-content").querySelectorAll("[data-del-skill]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      const index=Number(btn.dataset.delSkill);
+      confirmDel("Delete this skill?",()=>{
+        data.skills.splice(index,1);
+        persist();
+        renderSkills();
+        animateBars();
+      });
+    });
+  });
 }
 
 function renderEdu(){
@@ -1000,6 +1060,29 @@ function renderEdu(){
       </div>
     </div>`).join("") || `<p class="lead">No qualifications yet.</p>`;
   syncAdminTools();
+
+  // Bind education controls directly after every render.
+  el.querySelectorAll("[data-edit-edu]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      editEdu(Number(btn.dataset.editEdu));
+    });
+  });
+  el.querySelectorAll("[data-del-edu]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      const index = Number(btn.dataset.delEdu);
+      confirmDel("Delete this qualification?", ()=>{
+        data.qualifications.splice(index,1);
+        persist();
+        renderEdu();
+      });
+    });
+  });
 }
 
 function renderFilters(){
@@ -1043,6 +1126,32 @@ function renderCerts(){
   }).join("");
   observeReveals(grid);
   syncAdminTools();
+
+  // Bind certificate controls directly after every render.
+  grid.querySelectorAll("[data-edit-cert]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      editCert(Number(btn.dataset.editCert));
+    });
+  });
+  grid.querySelectorAll("[data-del-cert]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      const index = Number(btn.dataset.delCert);
+      confirmDel("Delete this certificate?", ()=>{
+        data.certificates.splice(index,1);
+        persist();
+        renderStats();
+        renderFilters();
+        renderCerts();
+        animateCounters();
+      });
+    });
+  });
 }
 
 function renderPersonal(){
@@ -1050,10 +1159,34 @@ function renderPersonal(){
     <div class="glass pd">
       <span class="k">${esc(p.label)}</span>
       <span class="v">${esc(p.value)}
-        <button class="edit-btn admin-only" data-edit-pd="${i}" title="Edit" style="width:26px;height:26px;margin-left:8px">${ico("edit")}</button>
-        <button class="edit-btn admin-only del" data-del-pd="${i}" title="Delete" style="width:26px;height:26px">${ico("trash")}</button>
+        <button type="button" class="edit-btn admin-only" data-edit-pd="${i}" title="Edit" style="width:26px;height:26px;margin-left:8px">${ico("edit")}</button>
+        <button type="button" class="edit-btn admin-only del" data-del-pd="${i}" title="Delete" style="width:26px;height:26px">${ico("trash")}</button>
       </span>
     </div>`).join("") || `<p class="lead">No personal details yet.</p>`;
+  syncAdminTools();
+
+  // Bind personal-detail controls directly after every render.
+  $("#pd-content").querySelectorAll("[data-edit-pd]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      editPd(Number(btn.dataset.editPd));
+    });
+  });
+  $("#pd-content").querySelectorAll("[data-del-pd]").forEach(btn=>{
+    btn.type = "button";
+    btn.addEventListener("click", ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      const index=Number(btn.dataset.delPd);
+      confirmDel("Delete this detail?",()=>{
+        data.personal.splice(index,1);
+        persist();
+        renderPersonal();
+      });
+    });
+  });
 }
 
 function renderContact(){
@@ -1569,31 +1702,150 @@ function toast(msg,type="ok"){
 /* ============================================================================
    EVENT DELEGATION
    ============================================================================ */
-document.addEventListener("click",e=>{
-  const t=e.target;
-  const A=(sel)=>t.closest(sel);
-  // filters
-  const fb=A("[data-filter]");
-  if(fb){ activeFilter=fb.dataset.filter; renderFilters(); renderCerts(); return; }
-  // open cert (not when clicking admin tools)
-  const cert=A(".cert");
-  if(cert && !A(".item-tools")){ openCert(+cert.dataset.cert); return; }
-  // admin edit buttons
-  if(A("[data-edit='profile']")) return editProfile();
-  if(A("[data-edit='about']"))   return editAbout();
-  if(A("[data-add='skill']"))    return editSkill(null);
-  if(A("[data-add='edu']"))      return editEdu(null);
-  if(A("[data-add='cert']"))     return editCert(null);
-  if(A("[data-add='pd']"))       return editPd(null);
+document.addEventListener("click", e => {
+  const target = e.target;
+  const closest = selector => target.closest(selector);
+
+  // ------------------------------------------------------------
+  // ADMIN CONTROLS: handle these FIRST so card clicks cannot
+  // swallow Edit/Delete button clicks.
+  // ------------------------------------------------------------
   let m;
-  if((m=A("[data-edit-skill]"))) return editSkill(+m.dataset.editSkill);
-  if((m=A("[data-del-skill]")))  return confirmDel("Delete this skill?",()=>{data.skills.splice(+m.dataset.delSkill,1);persist();renderSkills();animateBars();});
-  if((m=A("[data-edit-edu]")))   return editEdu(+m.dataset.editEdu);
-  if((m=A("[data-del-edu]")))    return confirmDel("Delete this qualification?",()=>{data.qualifications.splice(+m.dataset.delEdu,1);persist();renderEdu();});
-  if((m=A("[data-edit-cert]")))  return editCert(+m.dataset.editCert);
-  if((m=A("[data-del-cert]")))   return confirmDel("Delete this certificate?",()=>{data.certificates.splice(+m.dataset.delCert,1);persist();renderStats();renderFilters();renderCerts();animateCounters();});
-  if((m=A("[data-edit-pd]")))    return editPd(+m.dataset.editPd);
-  if((m=A("[data-del-pd]")))     return confirmDel("Delete this detail?",()=>{data.personal.splice(+m.dataset.delPd,1);persist();renderPersonal();});
+
+  if (closest("[data-edit='profile']")) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editProfile();
+  }
+
+  if (closest("[data-edit='about']")) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editAbout();
+  }
+
+  if (closest("[data-add='skill']")) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editSkill(null);
+  }
+
+  if (closest("[data-add='edu']")) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editEdu(null);
+  }
+
+  if (closest("[data-add='cert']")) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editCert(null);
+  }
+
+  if (closest("[data-add='pd']")) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editPd(null);
+  }
+
+  if ((m = closest("[data-edit-skill]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editSkill(Number(m.dataset.editSkill));
+  }
+
+  if ((m = closest("[data-del-skill]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    const index = Number(m.dataset.delSkill);
+    return confirmDel("Delete this skill?", () => {
+      data.skills.splice(index, 1);
+      persist();
+      renderSkills();
+      animateBars();
+    });
+  }
+
+  if ((m = closest("[data-edit-edu]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editEdu(Number(m.dataset.editEdu));
+  }
+
+  if ((m = closest("[data-del-edu]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    const index = Number(m.dataset.delEdu);
+    return confirmDel("Delete this qualification?", () => {
+      data.qualifications.splice(index, 1);
+      persist();
+      renderEdu();
+    });
+  }
+
+  if ((m = closest("[data-edit-cert]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editCert(Number(m.dataset.editCert));
+  }
+
+  if ((m = closest("[data-del-cert]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    const index = Number(m.dataset.delCert);
+    return confirmDel("Delete this certificate?", () => {
+      data.certificates.splice(index, 1);
+      persist();
+      renderStats();
+      renderFilters();
+      renderCerts();
+      animateCounters();
+    });
+  }
+
+  if ((m = closest("[data-edit-pd]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editPd(Number(m.dataset.editPd));
+  }
+
+  if ((m = closest("[data-del-pd]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    const index = Number(m.dataset.delPd);
+    return confirmDel("Delete this detail?", () => {
+      data.personal.splice(index, 1);
+      persist();
+      renderPersonal();
+    });
+  }
+
+  if ((m = closest("[data-edit-stat]"))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return editStat(Number(m.dataset.editStat));
+  }
+
+  // ------------------------------------------------------------
+  // FILTER BUTTONS
+  // ------------------------------------------------------------
+  const filterButton = closest("[data-filter]");
+  if (filterButton) {
+    activeFilter = filterButton.dataset.filter;
+    renderFilters();
+    renderCerts();
+    return;
+  }
+
+  // ------------------------------------------------------------
+  // CERTIFICATE CARD
+  // Only open the certificate when the actual card is clicked,
+  // never when an admin tool inside it is clicked.
+  // ------------------------------------------------------------
+  const cert = closest(".cert");
+  if (cert && !closest(".item-tools")) {
+    return openCert(Number(cert.dataset.cert));
+  }
 });
 
 $("#lock-btn").onclick=lockClick;
