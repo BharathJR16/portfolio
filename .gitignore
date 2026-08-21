@@ -1,0 +1,12 @@
+# Local admin password — MUST NEVER be committed
+admin-local.json
+
+# Never commit private backups (these contain your Personal Details)
+portfolio-private-backup-*.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

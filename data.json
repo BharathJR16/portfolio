@@ -1,0 +1,151 @@
+{
+  "profile": {
+    "name": "Bharath",
+    "initials": "B",
+    "status": "Available for opportunities",
+    "roles": [
+      "Cybersecurity Enthusiast",
+      "Full-Stack Developer",
+      "Hackathon Winner",
+      "Lifelong Learner"
+    ],
+    "tagline": "I build secure, delightful digital experiences — turning ideas into fast, beautiful, resilient software.",
+    "location": "City, Country",
+    "email": "bharathk9828@gmail.com",
+    "phone": "+00 000 000 0000",
+    "avatar": "",
+    "resume": "",
+    "socials": {
+      "github": "https://github.com/BharathJR16",
+      "linkedin": "https://linkedin.com/in/",
+      "twitter": "",
+      "website": ""
+    }
+  },
+  "about": "Hi! I'm a passionate technologist who loves solving hard problems at the intersection of security and great user experience.\n\nOver the years I've shipped projects, competed in hackathons, and earned certifications across web development, cloud, and cybersecurity. I care deeply about clean code, thoughtful design, and always learning something new.\n\nWhen I'm not coding, you'll find me exploring new tech, contributing to open source, or mentoring others.",
+  "interests": [
+    "Web Security",
+    "Cloud",
+    "AI/ML",
+    "Open Source",
+    "UI/UX",
+    "CTFs"
+  ],
+  "skills": [
+    {
+      "name": "JavaScript / TypeScript",
+      "level": 90,
+      "category": "Languages"
+    },
+    {
+      "name": "Python",
+      "level": 85,
+      "category": "Languages"
+    },
+    {
+      "name": "C / C++",
+      "level": 70,
+      "category": "Languages"
+    },
+    {
+      "name": "React / Next.js",
+      "level": 88,
+      "category": "Frameworks & Tools"
+    },
+    {
+      "name": "Node.js",
+      "level": 82,
+      "category": "Frameworks & Tools"
+    },
+    {
+      "name": "Docker & Git",
+      "level": 80,
+      "category": "Frameworks & Tools"
+    },
+    {
+      "name": "Penetration Testing",
+      "level": 78,
+      "category": "Security"
+    },
+    {
+      "name": "Network Security",
+      "level": 72,
+      "category": "Security"
+    },
+    {
+      "name": "Cryptography",
+      "level": 68,
+      "category": "Security"
+    },
+    {
+      "name": "UI / UX Design",
+      "level": 75,
+      "category": "Design & Other"
+    },
+    {
+      "name": "Problem Solving",
+      "level": 92,
+      "category": "Design & Other"
+    }
+  ],
+  "qualifications": [
+    {
+      "title": "B.Tech in Computer Science",
+      "institution": "Your University",
+      "period": "2022 — 2026",
+      "grade": "CGPA: 9.0 / 10",
+      "description": "Specialization in cybersecurity and software engineering. Active member of the coding & security clubs."
+    },
+    {
+      "title": "Higher Secondary (Science)",
+      "institution": "Your School",
+      "period": "2020 — 2022",
+      "grade": "95%",
+      "description": "Physics, Chemistry, Mathematics & Computer Science."
+    }
+  ],
+  "certificates": [
+    {
+      "id": "c1",
+      "title": "Full-Stack Web Development",
+      "issuer": "Coursera",
+      "category": "Course",
+      "date": "2025-03",
+      "url": "",
+      "image": "",
+      "description": "Comprehensive course covering front-end and back-end development with modern frameworks."
+    },
+    {
+      "id": "c2",
+      "title": "National Hackathon — 1st Place",
+      "issuer": "TechFest 2025",
+      "category": "Hackathon",
+      "date": "2025-02",
+      "url": "",
+      "image": "",
+      "description": "Built an AI-powered accessibility tool in 36 hours. Won first place among 200+ teams."
+    },
+    {
+      "id": "c3",
+      "title": "Software Engineering Intern",
+      "issuer": "Acme Corp",
+      "category": "Internship",
+      "date": "2024-06",
+      "url": "",
+      "image": "",
+      "description": "Worked on production microservices and improved API performance by 30%."
+    },
+    {
+      "id": "c4",
+      "title": "Certified Ethical Hacker (CEH)",
+      "issuer": "EC-Council",
+      "category": "Achievement",
+      "date": "2025-01",
+      "url": "",
+      "image": "",
+      "description": "Industry certification validating skills in ethical hacking and penetration testing."
+    }
+  ],
+  "personal": [],
+  "updatedAt": "2026-08-21T00:00:00.000Z"
+}
