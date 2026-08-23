@@ -98,10 +98,12 @@ img{max-width:100%;display:block}
 /* ============================================================
    CUSTOM CURSOR
    ============================================================ */
-.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:9998;mix-blend-mode:screen;transition:opacity .3s}
-.cursor-dot{width:6px;height:6px;background:var(--cyan);box-shadow:var(--glow-cyan);transform:translate(-50%,-50%)}
-.cursor-ring{width:34px;height:34px;border:1.5px solid rgba(168,85,247,.6);transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s,opacity .3s}
-.cursor-ring.hover{width:54px;height:54px;border-color:var(--cyan)}
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:9998;will-change:transform;transition:opacity .2s}
+.cursor-dot{width:7px;height:7px;background:var(--cyan);box-shadow:0 0 10px rgba(34,211,238,.8);transform:translate(-50%,-50%)}
+.cursor-ring{width:28px;height:28px;border:1.5px solid rgba(168,85,247,.55);background:rgba(168,85,247,.035);transform:translate(-50%,-50%);transition:width .16s,height .16s,border-color .16s,background .16s}
+.cursor-ring::after{content:"✦";position:absolute;left:50%;top:50%;font-size:8px;color:var(--cyan);transform:translate(-50%,-54%);opacity:.85}
+.cursor-ring.hover{width:40px;height:40px;border-color:var(--cyan);background:rgba(34,211,238,.07)}
+@media (prefers-reduced-motion:reduce){.cursor-dot,.cursor-ring{display:none}}
 @media (hover:none),(pointer:coarse){.cursor-dot,.cursor-ring{display:none}}
 
 /* Scroll progress */
@@ -1375,17 +1377,22 @@ function initParticles(){
   resize();raf=requestAnimationFrame(draw);
 }
 
-/* Custom cursor */
+/* Ultra-light cute cursor: one element, no animation loop */
 function initCursor(){
   if(matchMedia("(pointer:coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const dot=$(".cursor-dot"),ring=$(".cursor-ring"); if(!dot||!ring) return;
-  let rx=0,ry=0,mx=0,my=0,raf=0;
-  addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;},{passive:true});
-  function loop(){rx+=(mx-rx)*.22;ry+=(my-ry)*.22;ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;raf=requestAnimationFrame(loop);}
-  raf=requestAnimationFrame(loop);
+  const dot=$(".cursor-dot"),ring=$(".cursor-ring");
+  if(!dot||!ring) return;
+  let raf=0,mx=0,my=0,rx=0,ry=0;
+  const move=e=>{mx=e.clientX;my=e.clientY;if(!raf){raf=requestAnimationFrame(()=>{
+    dot.style.transform=`translate3d(${mx}px,${my}px,0) translate(-50%,-50%)`;
+    rx += (mx-rx)*.32; ry += (my-ry)*.32;
+    ring.style.transform=`translate3d(${rx}px,${ry}px,0) translate(-50%,-50%)`;
+    raf=0;
+  });}};
+  addEventListener("pointermove",move,{passive:true});
+  addEventListener("pointerover",e=>{if(e.target.closest("a,button,.cert,.project-card,.chip,input,textarea,select,.filter"))ring.classList.add("hover");},{passive:true});
+  addEventListener("pointerout",e=>{if(e.target.closest("a,button,.cert,.project-card,.chip,input,textarea,select,.filter"))ring.classList.remove("hover");},{passive:true});
   addEventListener("pagehide",()=>cancelAnimationFrame(raf),{once:true});
-  addEventListener("mouseover",e=>{if(e.target.closest("a,button,.cert,.project-card,.chip,input,textarea,select,.filter"))ring.classList.add("hover");},{passive:true});
-  addEventListener("mouseout",e=>{if(e.target.closest("a,button,.cert,.project-card,.chip,input,textarea,select,.filter"))ring.classList.remove("hover");},{passive:true});
 }
 
 /* Card tilt */
@@ -1615,22 +1622,35 @@ function openForm(title,fields,values,onSave,wide){
       }
       // Fallback: compress images before storing them. Huge base64 images are a
       // common cause of slow portfolio loads and localStorage quota problems.
-      const compressImage=async(file,maxSide=1400,quality=.82)=>{
-        const src=URL.createObjectURL(file);
-        try{
-          const img=new Image();
-          await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=src;});
-          const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
-          const c=document.createElement("canvas");
-          c.width=Math.max(1,Math.round(img.naturalWidth*scale));
-          c.height=Math.max(1,Math.round(img.naturalHeight*scale));
-          const cx=c.getContext("2d");
-          cx.drawImage(img,0,0,c.width,c.height);
-          return c.toDataURL("image/webp",quality);
-        }finally{URL.revokeObjectURL(src);}
+      const compressImage=async(file,maxSide=1000,quality=.72)=>{
+        if(file.size < 350000 && file.type !== "image/heic" && file.type !== "image/heif") return new Promise((resolve,reject)=>{
+          const rd=new FileReader();
+          rd.onload=()=>resolve(rd.result);
+          rd.onerror=reject;
+          rd.readAsDataURL(file);
+        });
+        const bitmap=await createImageBitmap(file,{imageOrientation:"from-image"});
+        const scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+        const w=Math.max(1,Math.round(bitmap.width*scale));
+        const h=Math.max(1,Math.round(bitmap.height*scale));
+        const c=document.createElement("canvas");
+        c.width=w; c.height=h;
+        const cx=c.getContext("2d",{alpha:false});
+        cx.drawImage(bitmap,0,0,w,h);
+        bitmap.close();
+        let blob=await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error("Image encoding failed")),"image/webp",quality));
+        if(blob.size>450000){
+          blob=await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error("Image encoding failed")),"image/jpeg",.60));
+        }
+        return new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onload=()=>resolve(reader.result);
+          reader.onerror=reject;
+          reader.readAsDataURL(blob);
+        });
       };
       try{
-        const compressed=await compressImage(file,name==="avatar"?1000:1400,name==="avatar"?.84:.80);
+        const compressed=await compressImage(file,name==="avatar"?700:1000,name==="avatar"?.72:.70);
         setVal(compressed);
       }catch(err){
         const rd=new FileReader(); rd.onload=()=>setVal(rd.result); rd.readAsDataURL(file);
