@@ -278,7 +278,7 @@ header#nav.scrolled{padding:11px 0;background:rgba(6,9,18,.72);backdrop-filter:b
   border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .28s;
 }
 .socials a:hover{color:#fff;transform:translateY(-4px);border-color:var(--violet);box-shadow:var(--glow-violet)}
-.socials a svg{width:19px;height:19px}
+.socials a svg{width:19px;height:19px}.socials a[title="linkedin"] svg{width:18px;height:18px}
 
 /* Hero visual */
 .hero-visual{display:grid;place-items:center;position:relative}
@@ -373,7 +373,7 @@ header#nav.scrolled{padding:11px 0;background:rgba(6,9,18,.72);backdrop-filter:b
 .cert .banner img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .cert:hover .banner img{transform:scale(1.07)}
 .cert .banner.ph{background:linear-gradient(150deg,rgba(34,211,238,.16),rgba(168,85,247,.16))}
-.cert .banner .big-ic{width:56px;height:56px;color:rgba(255,255,255,.85)}
+.cert .banner .big-ic{width:34px;height:34px;color:var(--muted);opacity:.9}
 .cert .banner .big-ic svg{width:100%;height:100%}
 .cat-tag{
   position:absolute;top:12px;left:12px;padding:5px 12px;border-radius:99px;font-family:var(--font-mono);
@@ -387,7 +387,9 @@ header#nav.scrolled{padding:11px 0;background:rgba(6,9,18,.72);backdrop-filter:b
 .cert .body{padding:20px 22px}
 .cert .body h3{font-family:var(--font-display);font-size:17px;line-height:1.3;margin-bottom:7px}
 .cert .body .issuer{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:7px}
+.cert .body .issuer svg,.cert .body .date svg{width:15px!important;height:15px!important;min-width:15px;min-height:15px;flex:0 0 15px}
 .cert .body .date{font-family:var(--font-mono);font-size:12px;color:var(--muted-2);margin-top:12px;display:flex;align-items:center;gap:6px}
+.cert .body .date svg{color:var(--cyan)}
 
 .cert .body .desc{color:var(--muted);font-size:13.5px;line-height:1.65;margin-top:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .cert .cert-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
@@ -1262,8 +1264,8 @@ function renderCerts(){
       <span class="cat-tag ${cat.cls}">${esc(cat.label.replace(/s$/,""))}</span>
       <div class="body">
         <h3>${esc(c.title)}</h3>
-        <div class="issuer">${ico("star")} ${esc(c.issuer||"")}</div>
-        ${c.date?`<div class="date">${ico("calendar")} ${esc(fmtDate(c.date))}</div>`:""}
+        ${c.issuer?`<div class="issuer">${/linkedin/i.test(c.issuer) ? ico("linkedin") : ""}<span>${esc(c.issuer)}</span></div>`:""}
+        ${c.date?`<div class="date">${ico("calendar")} <span>${esc(fmtDate(c.date))}</span></div>`:""}
         ${c.description?`<p class="desc">${nl2br(c.description)}</p>`:""}
         <div class="cert-actions">
           ${c.fileUrl?`<a class="btn btn-primary" href="${esc(c.fileUrl)}" target="_blank" rel="noopener" download>${ico("download")}<span>Download PDF</span></a>`:""}
