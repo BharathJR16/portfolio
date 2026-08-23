@@ -108,6 +108,37 @@ img{max-width:100%;display:block}
 #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:120;background:var(--grad-3);box-shadow:0 0 12px rgba(34,211,238,.7)}
 
 /* ============================================================
+   PERFORMANCE / PROJECTS
+   ============================================================ */
+/* Expensive visual effects are reduced automatically on smaller or low-power devices. */
+@media (max-width:900px){
+  .glass{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .bg-glow{filter:blur(55px)}
+  .avatar-ring,.orb,.logo .mark::after{animation:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+  #bg-canvas,.cursor-dot,.cursor-ring{display:none!important}
+}
+.projects-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.project-card{min-height:280px;transition:transform .25s,border-color .25s}
+.project-card:hover{transform:translateY(-5px);border-color:rgba(34,211,238,.35)}
+.project-cover{height:145px;overflow:hidden;background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(168,85,247,.12));border-bottom:1px solid var(--border)}
+.project-cover img{width:100%;height:100%;object-fit:cover;opacity:.9}
+.project-placeholder{height:100%;display:grid;place-items:center;font-size:46px;color:var(--cyan);background:radial-gradient(circle at 30% 20%,rgba(34,211,238,.16),transparent 40%),radial-gradient(circle at 80% 80%,rgba(168,85,247,.16),transparent 45%)}
+.project-body{padding:20px}
+.project-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.project-top h3{font-family:var(--font-display);font-size:21px;line-height:1.2}
+.project-desc{color:var(--muted);font-size:14px;margin:9px 0 14px}
+.project-tech{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.project-tech span{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted)}
+.project-links{display:flex;gap:9px;flex-wrap:wrap}
+.project-links .btn{padding:8px 13px;font-size:12px}
+.project-tools{position:absolute;right:12px;top:12px;display:none;gap:6px;z-index:3}
+.admin .project-tools{display:flex}
+@media(max-width:760px){.projects-grid{grid-template-columns:1fr}.project-card:hover{transform:none}}
+
+/* ============================================================
    LAYOUT HELPERS
    ============================================================ */
 .wrap{width:min(1120px,92vw);margin:0 auto}
@@ -127,7 +158,7 @@ section{padding:110px 0;position:relative}
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);contain:layout paint;
   position:relative;overflow:hidden;
 }
 .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
@@ -501,7 +532,7 @@ body.admin #admin-bar{transform:translateX(-50%) translateY(0)}
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
       <a href="#education">Education</a>
-      <a href="#hall">Hall of Fame</a>
+      <a href="#projects">Projects</a><a href="#hall">Hall of Fame</a>
       <a href="#contact">Contact</a>
     </nav>
     <div class="nav-actions">
@@ -512,7 +543,7 @@ body.admin #admin-bar{transform:translateX(-50%) translateY(0)}
 </header>
 <div id="mobile-menu">
   <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a>
-  <a href="#education">Education</a><a href="#hall">Hall of Fame</a><a href="#contact">Contact</a>
+  <a href="#education">Education</a><a href="#projects">Projects</a><a href="#hall">Hall of Fame</a><a href="#contact">Contact</a>
 </div>
 
 <!-- HERO -->
@@ -576,6 +607,21 @@ body.admin #admin-bar{transform:translateX(-50%) translateY(0)}
       <button class="edit-btn admin-only" data-add="edu" title="Add qualification"></button>
     </div>
     <div class="timeline reveal" id="edu-content"></div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <span class="eyebrow">What I've built</span>
+        <h2 class="sec-title">Featured <span class="gradient-text">Projects</span></h2>
+        <p class="lead">Real projects, experiments and things I am proud to ship.</p>
+      </div>
+      <button class="btn btn-primary btn-sm admin-only" data-add="project"><span>+ Add Project</span></button>
+    </div>
+    <div class="projects-grid" id="projects-grid"></div>
   </div>
 </section>
 
@@ -753,6 +799,10 @@ const DEFAULT = {
     {title:"B.Tech in Computer Science",institution:"Your University",period:"2022 — 2026",grade:"CGPA: 9.0 / 10",description:"Specialization in cybersecurity and software engineering. Active member of the coding & security clubs."},
     {title:"Higher Secondary (Science)",institution:"Your School",period:"2020 — 2022",grade:"95%",description:"Physics, Chemistry, Mathematics & Computer Science."}
   ],
+  projects:[
+    {id:"p1",title:"AI Voice Assistant",description:"Speech-command assistant with recognition, translation and smart responses.",tech:["Python","AI/ML","Speech Recognition"],image:"",github:"",demo:""},
+    {id:"p2",title:"Personal Portfolio",description:"A fast, cloud-backed portfolio with authentication, certificates and live content management.",tech:["HTML","CSS","JavaScript","Supabase"],image:"",github:"",demo:""}
+  ],
   certificates:[
     {id:"c1",title:"Full-Stack Web Development",issuer:"Coursera",category:"Course",date:"2025-03",url:"",image:"",description:"Comprehensive course covering front-end and back-end development with modern frameworks."},
     {id:"c2",title:"National Hackathon — 1st Place",issuer:"TechFest 2025",category:"Hackathon",date:"2025-02",url:"",image:"",description:"Built an AI-powered accessibility tool in 36 hours. Won first place among 200+ teams."},
@@ -794,7 +844,7 @@ function normalize(d){
   out.profile = Object.assign(structuredClone(DEFAULT.profile),d.profile||{});
   out.profile.socials = Object.assign(structuredClone(DEFAULT.profile.socials),(d.profile&&d.profile.socials)||{});
   if(!Array.isArray(out.profile.roles)) out.profile.roles = DEFAULT.profile.roles.slice();
-  ["skills","qualifications","certificates","interests"].forEach(k=>{
+  ["skills","qualifications","certificates","projects","interests"].forEach(k=>{
     if(!Array.isArray(out[k])) out[k] = structuredClone(DEFAULT[k]);
   });
   // Private details are absent from the public row — absence must mean "none",
@@ -910,7 +960,7 @@ const uid = ()=>"c"+Math.random().toString(36).slice(2,9);
    ============================================================================ */
 function renderAll(){
   renderHero(); renderStats(); renderAbout(); renderSkills();
-  renderEdu(); renderFilters(); renderCerts(); renderPersonal(); renderContact();
+  renderEdu(); renderProjects(); renderFilters(); renderCerts(); renderPersonal(); renderContact();
   document.title = (data.profile.name||"Portfolio")+" — Portfolio";
 }
 
@@ -939,7 +989,7 @@ function renderHero(){
     <div class="socials">${socialLinks}</div>`;
 
   const core = $("#avatar-core");
-  core.innerHTML = p.avatar ? `<img src="${esc(p.avatar)}" alt="${esc(p.name)}">`
+  core.innerHTML = p.avatar ? `<img src="${esc(p.avatar)}" alt="${esc(p.name)}" decoding="async" fetchpriority="high">`
     : `<span class="initials">${esc((p.initials||(p.name||"YN").split(/\s+/).map(w=>w[0]).join("")).slice(0,2).toUpperCase())}</span>`;
   startTyping(p.roles && p.roles.length ? p.roles : ["Developer"]);
 }
@@ -1085,6 +1135,40 @@ function renderEdu(){
   });
 }
 
+function renderProjects(){
+  const grid=$("#projects-grid");
+  if(!grid) return;
+  const list=Array.isArray(data.projects)?data.projects:[];
+  if(!list.length){
+    grid.innerHTML=`<div class="empty">No projects yet.${isAdmin?' Click <b>+ Add Project</b> to add one.':''}</div>`;
+    return;
+  }
+  grid.innerHTML=list.map((pr,i)=>{
+    const tech=Array.isArray(pr.tech)?pr.tech:[];
+    const cover=pr.image
+      ? `<div class="project-cover"><img src="${esc(pr.image)}" alt="${esc(pr.title)}" loading="lazy" decoding="async"></div>`
+      : `<div class="project-cover"><div class="project-placeholder">${ico("code")}</div></div>`;
+    return `<article class="glass project-card reveal">
+      <div class="project-tools admin-only">
+        <button type="button" class="edit-btn" data-edit-project="${i}" title="Edit project">${ico("edit")}</button>
+        <button type="button" class="edit-btn del" data-del-project="${i}" title="Delete project">${ico("trash")}</button>
+      </div>
+      ${cover}
+      <div class="project-body">
+        <div class="project-top"><h3>${esc(pr.title||"Untitled project")}</h3></div>
+        ${pr.description?`<p class="project-desc">${nl2br(pr.description)}</p>`:""}
+        ${tech.length?`<div class="project-tech">${tech.map(t=>`<span>${esc(t)}</span>`).join("")}</div>`:""}
+        <div class="project-links">
+          ${pr.github?`<a class="btn btn-ghost" href="${esc(pr.github)}" target="_blank" rel="noopener">${ico("github")}<span>Code</span></a>`:""}
+          ${pr.demo?`<a class="btn btn-primary" href="${esc(pr.demo)}" target="_blank" rel="noopener">${ico("ext")}<span>Live Demo</span></a>`:""}
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+  observeReveals(grid);
+  syncAdminTools();
+}
+
 function renderFilters(){
   const counts = {all:data.certificates.length};
   CATS.forEach(c=>counts[c.key]=data.certificates.filter(x=>x.category===c.key).length);
@@ -1107,7 +1191,7 @@ function renderCerts(){
   grid.innerHTML = list.map((c,idx)=>{
     const cat = catOf(c.category);
     const banner = c.image
-      ? `<div class="banner"><img src="${esc(c.image)}" alt="${esc(c.title)}" loading="lazy"></div>`
+      ? `<div class="banner"><img src="${esc(c.image)}" alt="${esc(c.title)}" loading="lazy" decoding="async"></div>`
       : `<div class="banner ph"><span class="big-ic">${ico(cat.icon)}</span></div>`;
     return `
     <article class="glass cert reveal" data-cert="${c._i}" style="animation-delay:${idx*60}ms">
@@ -1257,61 +1341,59 @@ function observeReveals(root=document){
 
 /* Particle network background */
 function initParticles(){
-  const cv=$("#bg-canvas"),ctx=cv.getContext("2d");
-  let w,h,pts,raf,running=true,mouse={x:-999,y:-999};
-  const DENSITY=9000;
+  const cv=$("#bg-canvas");
+  if(!cv || matchMedia("(prefers-reduced-motion: reduce)").matches || matchMedia("(max-width: 760px)").matches) return;
+  const ctx=cv.getContext("2d",{alpha:true});
+  let w=0,h=0,pts=[],raf=0,last=0,mouse={x:-999,y:-999};
+  const MAX_POINTS=55, LINK=115, FRAME_MS=33;
   function resize(){
-    w=cv.width=innerWidth;h=cv.height=innerHeight;
-    const n=Math.min(120,Math.floor(w*h/DENSITY));
-    pts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}));
+    w=innerWidth;h=innerHeight;
+    const dpr=Math.min(devicePixelRatio||1,1.5);
+    cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+"px";cv.style.height=h+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const n=Math.min(MAX_POINTS,Math.max(24,Math.floor(w*h/18000)));
+    pts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25}));
   }
-  function draw(){
+  function draw(t){
+    raf=requestAnimationFrame(draw);
+    if(t-last<FRAME_MS) return; last=t;
     ctx.clearRect(0,0,w,h);
-    for(const p of pts){
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
-    }
+    for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}
+    ctx.lineWidth=1;
     for(let i=0;i<pts.length;i++){
       const a=pts[i];
       for(let j=i+1;j<pts.length;j++){
-        const b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
-        if(d<130){ctx.strokeStyle=`rgba(34,211,238,${(1-d/130)*.16})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+        const b=pts[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy;
+        if(d2<LINK*LINK){const alpha=(1-Math.sqrt(d2)/LINK)*.12;ctx.strokeStyle=`rgba(34,211,238,${alpha})`;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
       }
-      const md=Math.hypot(a.x-mouse.x,a.y-mouse.y);
-      if(md<160){ctx.strokeStyle=`rgba(168,85,247,${(1-md/160)*.28})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(mouse.x,mouse.y);ctx.stroke();}
-      ctx.fillStyle="rgba(120,200,255,.55)";ctx.beginPath();ctx.arc(a.x,a.y,1.5,0,7);ctx.fill();
+      ctx.fillStyle="rgba(120,200,255,.45)";ctx.beginPath();ctx.arc(a.x,a.y,1.2,0,Math.PI*2);ctx.fill();
     }
-    raf=requestAnimationFrame(draw);
   }
-  addEventListener("resize",resize);
-  addEventListener("mousemove",e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
-  addEventListener("mouseout",()=>{mouse.x=mouse.y=-999;});
-  document.addEventListener("visibilitychange",()=>{ if(document.hidden){cancelAnimationFrame(raf);running=false;} else if(!running){running=true;draw();} });
-  resize();draw();
+  addEventListener("resize",resize,{passive:true});
+  addEventListener("mousemove",e=>{mouse.x=e.clientX;mouse.y=e.clientY;},{passive:true});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)cancelAnimationFrame(raf);else{last=0;raf=requestAnimationFrame(draw);}});
+  resize();raf=requestAnimationFrame(draw);
 }
 
 /* Custom cursor */
 function initCursor(){
-  if(matchMedia("(pointer:coarse)").matches) return;
-  const dot=$(".cursor-dot"),ring=$(".cursor-ring");
-  let rx=0,ry=0,mx=0,my=0;
-  addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;});
-  (function loop(){rx+=(mx-rx)*.18;ry+=(my-ry)*.18;ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;requestAnimationFrame(loop);})();
-  addEventListener("mouseover",e=>{ if(e.target.closest("a,button,.cert,.chip,input,textarea,select,.filter")) ring.classList.add("hover"); });
-  addEventListener("mouseout",e=>{ if(e.target.closest("a,button,.cert,.chip,input,textarea,select,.filter")) ring.classList.remove("hover"); });
+  if(matchMedia("(pointer:coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const dot=$(".cursor-dot"),ring=$(".cursor-ring"); if(!dot||!ring) return;
+  let rx=0,ry=0,mx=0,my=0,raf=0;
+  addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;},{passive:true});
+  function loop(){rx+=(mx-rx)*.22;ry+=(my-ry)*.22;ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;raf=requestAnimationFrame(loop);}
+  raf=requestAnimationFrame(loop);
+  addEventListener("pagehide",()=>cancelAnimationFrame(raf),{once:true});
+  addEventListener("mouseover",e=>{if(e.target.closest("a,button,.cert,.project-card,.chip,input,textarea,select,.filter"))ring.classList.add("hover");},{passive:true});
+  addEventListener("mouseout",e=>{if(e.target.closest("a,button,.cert,.project-card,.chip,input,textarea,select,.filter"))ring.classList.remove("hover");},{passive:true});
 }
 
 /* Card tilt */
 function initTilt(){
-  if(matchMedia("(pointer:coarse)").matches) return;
-  document.addEventListener("mousemove",e=>{
-    const card=e.target.closest(".cert,.stat");
-    if(!card) return;
-    const r=card.getBoundingClientRect();
-    const px=(e.clientX-r.left)/r.width-.5, py=(e.clientY-r.top)/r.height-.5;
-    card.style.transform=`perspective(700px) rotateX(${(-py*6).toFixed(2)}deg) rotateY(${(px*6).toFixed(2)}deg) translateY(-4px)`;
-  });
-  document.addEventListener("mouseout",e=>{const c=e.target.closest(".cert,.stat");if(c)c.style.transform="";});
+  if(matchMedia("(pointer:coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let active=null,raf=0,lastEvent=null;
+  document.addEventListener("mousemove",e=>{lastEvent=e;if(!raf)raf=requestAnimationFrame(update);},{passive:true});
+  function update(){raf=0;if(!lastEvent)return;const e=lastEvent;const card=e.target.closest(".cert,.stat,.project-card");if(!card){if(active)active.style.transform="";active=null;return;}active=card;const r=card.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(700px) rotateX(${(-py*3).toFixed(2)}deg) rotateY(${(px*3).toFixed(2)}deg) translateY(-3px)`;}
 }
 
 /* ============================================================================
@@ -1531,11 +1613,28 @@ function openForm(title,fields,values,onSave,wide){
           toast("Upload failed ("+(e.message||"error")+") — embedding inline instead.","err");
         }
       }
-      // Fallback: inline base64 (works offline; keep images small).
-      if(file.size>1.2*1024*1024) toast("Large image inlined — consider a smaller file or a URL.","err");
-      const rd=new FileReader();
-      rd.onload=()=>setVal(rd.result);
-      rd.readAsDataURL(file);
+      // Fallback: compress images before storing them. Huge base64 images are a
+      // common cause of slow portfolio loads and localStorage quota problems.
+      const compressImage=async(file,maxSide=1400,quality=.82)=>{
+        const src=URL.createObjectURL(file);
+        try{
+          const img=new Image();
+          await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=src;});
+          const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+          const c=document.createElement("canvas");
+          c.width=Math.max(1,Math.round(img.naturalWidth*scale));
+          c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+          const cx=c.getContext("2d");
+          cx.drawImage(img,0,0,c.width,c.height);
+          return c.toDataURL("image/webp",quality);
+        }finally{URL.revokeObjectURL(src);}
+      };
+      try{
+        const compressed=await compressImage(file,name==="avatar"?1000:1400,name==="avatar"?.84:.80);
+        setVal(compressed);
+      }catch(err){
+        const rd=new FileReader(); rd.onload=()=>setVal(rd.result); rd.readAsDataURL(file);
+      }
     };
   });
   $$('input[type=text][name]').forEach(inp=>{
@@ -1563,7 +1662,7 @@ function editProfile(){
     {name:"location",label:"Location"},
     {name:"email",label:"Email",type:"email"},
     {name:"phone",label:"Phone"},
-    {name:"avatar",label:"Avatar image",type:"image"},
+    {name:"avatar",label:"Profile Photo",type:"image",hint:"Upload your photo. It will be compressed automatically for faster loading."},
     {name:"resume",label:"Resume / CV link (URL)",type:"url"},
     {name:"github",label:"GitHub URL",type:"url"},
     {name:"linkedin",label:"LinkedIn URL",type:"url"},
@@ -1611,6 +1710,22 @@ function editEdu(i){
     persist(); renderEdu();
   });
 }
+function editProject(i){
+  const pr=i!=null?data.projects[i]:{id:uid(),title:"",description:"",tech:[],image:"",github:"",demo:""};
+  openForm(i!=null?"Edit Project":"Add Project",[
+    {name:"title",label:"Project name",placeholder:"e.g. AI Voice Assistant"},
+    {name:"description",label:"Description",type:"textarea",rows:4},
+    {name:"tech",label:"Technologies (comma separated)",placeholder:"Python, React, Supabase"},
+    {name:"image",label:"Project cover image",type:"image",hint:"Use a compressed image or upload one."},
+    {name:"github",label:"GitHub / source URL",type:"url"},
+    {name:"demo",label:"Live demo URL",type:"url"}
+  ],{...pr,tech:(pr.tech||[]).join(", ")},o=>{
+    const rec={...pr,title:o.title,description:o.description,tech:o.tech.split(",").map(x=>x.trim()).filter(Boolean),image:o.image,github:o.github,demo:o.demo};
+    if(i!=null) data.projects[i]=rec; else data.projects.push(rec);
+    persist(); renderProjects(); toast(i!=null?"Project updated.":"Project added.","ok");
+  },true);
+}
+
 function editCert(i){
   const c=i!=null?data.certificates[i]:{id:uid(),title:"",issuer:"",category:"Course",date:"",url:"",image:"",description:""};
   openForm(i!=null?"Edit Certificate":"Add Certificate",[
@@ -1854,6 +1969,15 @@ document.addEventListener("click", e => {
     e.preventDefault();
     e.stopPropagation();
     return editStat(Number(m.dataset.editStat));
+  }
+
+  if ((m = closest("[data-edit-project]"))) {
+    e.preventDefault(); e.stopPropagation(); return editProject(Number(m.dataset.editProject));
+  }
+  if ((m = closest("[data-del-project]"))) {
+    e.preventDefault(); e.stopPropagation();
+    const index=Number(m.dataset.delProject);
+    return confirmDel("Delete this project?",()=>{ data.projects.splice(index,1); persist(); renderProjects(); });
   }
 
   // ------------------------------------------------------------
