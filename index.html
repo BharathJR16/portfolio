@@ -1347,7 +1347,22 @@ function updateLockBtn(){
   const who=$("#ab-who");
   if(who && session && session.user) who.textContent=session.user.email;
 }
-function syncAdminTools(){ $$(".item-tools").forEach(t=>t.style.display=isAdmin?"flex":"none"); }
+function syncAdminTools(){
+  document.body.classList.toggle("admin", !!isAdmin);
+
+  // Every admin-only control follows the same source of truth.
+  $$(".admin-only").forEach(el=>{
+    if (isAdmin) {
+      el.style.setProperty("display", el.classList.contains("item-tools") ? "flex" : "inline-flex", "important");
+      el.removeAttribute("aria-hidden");
+    } else {
+      el.style.setProperty("display", "none", "important");
+      el.setAttribute("aria-hidden", "true");
+    }
+  });
+
+  updateLockBtn();
+}
 
 /* Applies whatever the current session is to the UI. Called on load, on
    sign-in/out, and on token refresh via onAuthStateChange. */
@@ -1713,48 +1728,56 @@ document.addEventListener("click", e => {
   let m;
 
   if (closest("[data-edit='profile']")) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editProfile();
   }
 
   if (closest("[data-edit='about']")) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editAbout();
   }
 
   if (closest("[data-add='skill']")) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editSkill(null);
   }
 
   if (closest("[data-add='edu']")) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editEdu(null);
   }
 
   if (closest("[data-add='cert']")) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editCert(null);
   }
 
   if (closest("[data-add='pd']")) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editPd(null);
   }
 
   if ((m = closest("[data-edit-skill]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editSkill(Number(m.dataset.editSkill));
   }
 
   if ((m = closest("[data-del-skill]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     const index = Number(m.dataset.delSkill);
@@ -1767,12 +1790,14 @@ document.addEventListener("click", e => {
   }
 
   if ((m = closest("[data-edit-edu]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editEdu(Number(m.dataset.editEdu));
   }
 
   if ((m = closest("[data-del-edu]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     const index = Number(m.dataset.delEdu);
@@ -1784,12 +1809,14 @@ document.addEventListener("click", e => {
   }
 
   if ((m = closest("[data-edit-cert]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editCert(Number(m.dataset.editCert));
   }
 
   if ((m = closest("[data-del-cert]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     const index = Number(m.dataset.delCert);
@@ -1804,12 +1831,14 @@ document.addEventListener("click", e => {
   }
 
   if ((m = closest("[data-edit-pd]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editPd(Number(m.dataset.editPd));
   }
 
   if ((m = closest("[data-del-pd]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     const index = Number(m.dataset.delPd);
@@ -1821,6 +1850,7 @@ document.addEventListener("click", e => {
   }
 
   if ((m = closest("[data-edit-stat]"))) {
+    if (!isAdmin) return;
     e.preventDefault();
     e.stopPropagation();
     return editStat(Number(m.dataset.editStat));
